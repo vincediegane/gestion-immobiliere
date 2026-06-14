@@ -1,0 +1,1 @@
+-- Sprint 1 initializes Flyway without creating business tables.
