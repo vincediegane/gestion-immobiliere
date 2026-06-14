@@ -4,9 +4,7 @@ services:
     environment:
       POSTGRES_DB: ${DB_NAME:-real_estate}
       POSTGRES_USER: ${DB_USER:-real_estate}
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-real_estate_dev}
-    ports:
-      - "${DB_PORT:-5432}:5432"
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD must be set}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -26,12 +24,12 @@ services:
       DB_PORT: 5432
       DB_NAME: ${DB_NAME:-real_estate}
       DB_USER: ${DB_USER:-real_estate}
-      DB_PASSWORD: ${DB_PASSWORD:-real_estate_dev}
+      DB_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD must be set}
       DEFAULT_ORGANIZATION_ID: ${DEFAULT_ORGANIZATION_ID:-00000000-0000-0000-0000-000000000001}
-      JWT_SECRET: ${JWT_SECRET:-local-development-secret-key-change-before-production-2026}
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET must be set}
       JWT_VALIDITY_MINUTES: ${JWT_VALIDITY_MINUTES:-480}
-      BOOTSTRAP_ADMIN_EMAIL: ${BOOTSTRAP_ADMIN_EMAIL:-admin@demo.sn}
-      BOOTSTRAP_ADMIN_PASSWORD: ${BOOTSTRAP_ADMIN_PASSWORD:-Admin123!}
+      BOOTSTRAP_ADMIN_EMAIL: ${BOOTSTRAP_ADMIN_EMAIL:?BOOTSTRAP_ADMIN_EMAIL must be set}
+      BOOTSTRAP_ADMIN_PASSWORD: ${BOOTSTRAP_ADMIN_PASSWORD:?BOOTSTRAP_ADMIN_PASSWORD must be set}
       SERVER_PORT: 8080
     ports:
       - "${BACKEND_PORT:-8080}:8080"
@@ -44,6 +42,17 @@ services:
       timeout: 5s
       retries: 10
       start_period: 30s
+    restart: unless-stopped
+
+  postgres-dev:
+    image: alpine/socat:1.8.0.3
+    profiles: ["dev"]
+    command: ["tcp-listen:5432,fork,reuseaddr", "tcp-connect:postgres:5432"]
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    depends_on:
+      postgres:
+        condition: service_healthy
     restart: unless-stopped
 
   backend-tests:

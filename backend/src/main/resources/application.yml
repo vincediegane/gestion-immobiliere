@@ -4,7 +4,7 @@ spring:
   datasource:
     url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:real_estate}
     username: ${DB_USER:real_estate}
-    password: ${DB_PASSWORD:real_estate_dev}
+    password: ${DB_PASSWORD}
   flyway:
     enabled: true
   jpa:
@@ -25,10 +25,10 @@ app:
   owner:
     organization-id: ${DEFAULT_ORGANIZATION_ID:00000000-0000-0000-0000-000000000001}
   security:
-    jwt-secret: ${JWT_SECRET:local-development-secret-key-change-before-production-2026}
+    jwt-secret: ${JWT_SECRET}
     token-validity-minutes: ${JWT_VALIDITY_MINUTES:480}
-    bootstrap-email: ${BOOTSTRAP_ADMIN_EMAIL:admin@demo.sn}
-    bootstrap-password: ${BOOTSTRAP_ADMIN_PASSWORD:Admin123!}
+    bootstrap-email: ${BOOTSTRAP_ADMIN_EMAIL}
+    bootstrap-password: ${BOOTSTRAP_ADMIN_PASSWORD}
 
 management:
   endpoints:

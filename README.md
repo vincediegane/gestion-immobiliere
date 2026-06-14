@@ -8,7 +8,7 @@ L'application comprend :
 - frontend React / TypeScript / Vite / Material UI ;
 - authentification JWT avec roles `ADMIN` et `GESTIONNAIRE` ;
 - gestion des proprietaires, biens, unites et locataires ;
-- gestion des baux et generation de leur premiere echeance ;
+- gestion des baux et generation idempotente de toutes leurs echeances mensuelles manquantes ;
 - paiements partiels ou complets et detection des impayes ;
 - preparation de relances WhatsApp sans envoi automatique ;
 - generation de quittances PDF pour les echeances soldees ;
@@ -27,6 +27,8 @@ Le seul prerequis est Docker avec Docker Compose. Java, Maven, Node.js et Nginx 
 Depuis la racine du depot :
 
 ```bash
+cp .env.example .env
+# Remplacer toutes les valeurs sensibles dans .env
 docker compose up --build -d
 docker compose ps
 ```
@@ -38,16 +40,15 @@ Services disponibles :
 - API via le frontend/Nginx : `http://localhost:5173/api/owners` ;
 - Swagger UI : `http://localhost:8080/swagger-ui/index.html` ;
 - specification OpenAPI : `http://localhost:8080/v3/api-docs` ;
-- PostgreSQL : `localhost:5432`.
+- PostgreSQL n'est pas expose sur l'hote par defaut.
 
-Compte administrateur local :
+Les identifiants administrateur et tous les secrets sont obligatoires dans `.env`. Le depot ne fournit aucun mot de passe utilisable par defaut.
 
-```text
-Email : admin@demo.sn
-Mot de passe : Admin123!
+Pour exposer temporairement PostgreSQL sur `localhost:5432` en developpement :
+
+```bash
+docker compose --profile dev up -d postgres-dev
 ```
-
-Ces valeurs sont uniquement destinees au developpement local et doivent etre remplacees par variables d'environnement hors poste de developpement.
 
 Les corps JSON envoyes a l'API doivent etre encodes en UTF-8. Utiliser de preference l'en-tete `Content-Type: application/json; charset=UTF-8`, notamment pour les noms et adresses avec accents.
 
@@ -128,7 +129,7 @@ docker compose build frontend
 
 ## Configuration
 
-Configuration locale par defaut :
+Configuration PostgreSQL interne :
 
 | Parametre | Valeur |
 |---|---|
@@ -136,7 +137,7 @@ Configuration locale par defaut :
 | Port | `5432` |
 | Base | `real_estate` |
 | Utilisateur | `real_estate` |
-| Mot de passe | `real_estate_dev` |
+| Mot de passe | valeur obligatoire de `DB_PASSWORD` |
 
 Reponse attendue du healthcheck :
 
@@ -154,6 +155,10 @@ Variables Docker Compose disponibles :
 - `DEFAULT_ORGANIZATION_ID`.
 - `JWT_SECRET`, `JWT_VALIDITY_MINUTES` ;
 - `BOOTSTRAP_ADMIN_EMAIL`, `BOOTSTRAP_ADMIN_PASSWORD`.
+
+`DB_PASSWORD`, `JWT_SECRET`, `BOOTSTRAP_ADMIN_EMAIL` et `BOOTSTRAP_ADMIN_PASSWORD` sont obligatoires. Utiliser `.env.example` comme modele, sans committer le fichier `.env` reel.
+
+Les paiements exigent l'en-tete `Idempotency-Key` avec une valeur unique par tentative logique. Le rejeu de la meme cle retourne le paiement deja enregistre sans debiter une seconde fois.
 
 `DEFAULT_ORGANIZATION_ID` fournit l'organisation initiale locale. Pour une requete authentifiee, l'organisation effective provient du claim JWT `organization_id`.
 

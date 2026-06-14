@@ -18,6 +18,7 @@ import sn.gestionimmobiliere.backend.property.application.PropertyNotFoundExcept
 import sn.gestionimmobiliere.backend.tenant.application.TenantNotFoundException;
 import sn.gestionimmobiliere.backend.unit.application.UnitNotFoundException;
 import sn.gestionimmobiliere.backend.billing.application.RentChargeNotFoundException;
+import sn.gestionimmobiliere.backend.billing.application.PaymentConflictException;
 import sn.gestionimmobiliere.backend.lease.application.LeaseConflictException;
 import sn.gestionimmobiliere.backend.lease.application.LeaseNotFoundException;
 
@@ -41,7 +42,7 @@ public class ApiExceptionHandler {
 		return problem(HttpStatus.NOT_FOUND, "resource-not-found", "Ressource introuvable", exception.getMessage());
 	}
 
-	@ExceptionHandler({LeaseConflictException.class, IllegalArgumentException.class})
+	@ExceptionHandler({LeaseConflictException.class, PaymentConflictException.class, IllegalArgumentException.class})
 	ProblemDetail handleBusinessConflict(RuntimeException exception) {
 		return problem(HttpStatus.CONFLICT, "business-conflict", "Operation impossible", exception.getMessage());
 	}
