@@ -17,4 +17,6 @@ public interface PropertyRepository extends JpaRepository<Property, UUID> {
 			Pageable pageable);
 
 	Optional<Property> findByIdAndOrganizationIdAndDeletedAtIsNull(UUID id, UUID organizationId);
+
+	long countByOrganizationIdAndDeletedAtIsNull(UUID organizationId);
 }

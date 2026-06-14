@@ -1,0 +1,15 @@
+package sn.gestionimmobiliere.backend.billing.application;
+import java.time.*;import java.util.*;import org.springframework.data.domain.*;import org.springframework.stereotype.Service;import org.springframework.transaction.annotation.Transactional;
+import sn.gestionimmobiliere.backend.billing.api.*;import sn.gestionimmobiliere.backend.billing.domain.*;import sn.gestionimmobiliere.backend.billing.infrastructure.*;import sn.gestionimmobiliere.backend.owner.application.OwnerProperties;
+@Service public class BillingService{
+	private final RentChargeRepository charges;private final PaymentRepository payments;private final OwnerProperties props;private final Clock clock;public BillingService(RentChargeRepository c,PaymentRepository p,OwnerProperties o,Clock k){charges=c;payments=p;props=o;clock=k;}
+	@Transactional public RentCharge createCharge(UUID leaseId,LocalDate start,long amount,int dueDay){LocalDate period=start.withDayOfMonth(1);LocalDate due=period.withDayOfMonth(dueDay);RentCharge c=new RentCharge(UUID.randomUUID(),props.organizationId(),leaseId,period,due,amount,today(),clock.instant());return charges.saveAndFlush(c);}
+	@Transactional(readOnly=true) public Page<RentChargeResponse> all(Pageable p){return charges.findAllByOrganizationId(props.organizationId(),p).map(this::map);}
+	@Transactional(readOnly=true) public RentChargeResponse one(UUID id){return map(entity(id));}
+	@Transactional public PaymentResponse pay(UUID id,CreatePaymentRequest r){RentCharge c=entity(id);c.pay(r.amount(),today(),clock.instant());charges.save(c);Payment p=payments.saveAndFlush(new Payment(UUID.randomUUID(),props.organizationId(),id,r.amount(),r.paymentDate(),r.method(),r.reference(),clock.instant()));return new PaymentResponse(p.getId(),p.getRentChargeId(),p.getAmount(),p.getPaymentDate(),p.getMethod(),p.getReference(),p.getStatus(),p.getCreatedAt());}
+	@Transactional(readOnly=true) public List<PaymentResponse> payments(UUID id){entity(id);return payments.findAllByRentChargeIdOrderByPaymentDateDesc(id).stream().map(p->new PaymentResponse(p.getId(),p.getRentChargeId(),p.getAmount(),p.getPaymentDate(),p.getMethod(),p.getReference(),p.getStatus(),p.getCreatedAt())).toList();}
+	@Transactional public int refreshOverdue(){List<RentCharge> list=charges.findAllByOrganizationIdAndStatusIn(props.organizationId(),List.of(ChargeStatus.UPCOMING,ChargeStatus.DUE,ChargeStatus.PARTIAL,ChargeStatus.OVERDUE));list.forEach(c->c.refresh(today(),clock.instant()));charges.saveAll(list);return list.size();}
+	public RentCharge entity(UUID id){return charges.findByIdAndOrganizationId(id,props.organizationId()).orElseThrow(()->new RentChargeNotFoundException(id));}
+	private RentChargeResponse map(RentCharge c){c.refresh(today(),clock.instant());return new RentChargeResponse(c.getId(),c.getLeaseId(),c.getPeriodStart(),c.getDueDate(),c.getAmountDue(),c.getAmountPaid(),c.getBalance(),c.getStatus(),c.getCreatedAt(),c.getUpdatedAt());}
+	private LocalDate today(){return LocalDate.now(clock.withZone(ZoneId.of("Africa/Dakar")));}
+}

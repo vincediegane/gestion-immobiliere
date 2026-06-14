@@ -20,6 +20,7 @@ import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.http.MediaType;
@@ -32,8 +33,10 @@ import sn.gestionimmobiliere.backend.owner.application.DuplicateOwnerEmailExcept
 import sn.gestionimmobiliere.backend.owner.application.OwnerNotFoundException;
 import sn.gestionimmobiliere.backend.owner.application.OwnerService;
 import sn.gestionimmobiliere.backend.shared.api.ApiExceptionHandler;
+import sn.gestionimmobiliere.backend.identity.application.JwtService;
 
 @WebMvcTest(OwnerController.class)
+@AutoConfigureMockMvc(addFilters = false)
 @Import(ApiExceptionHandler.class)
 class OwnerControllerTests {
 
@@ -48,6 +51,9 @@ class OwnerControllerTests {
 
 	@MockitoBean
 	private OwnerService ownerService;
+
+	@MockitoBean
+	private JwtService jwtService;
 
 	@Test
 	void createsOwner() throws Exception {

@@ -1,0 +1,3 @@
+package sn.gestionimmobiliere.backend.lease.infrastructure;
+import java.util.*;import org.springframework.data.domain.*;import org.springframework.data.jpa.repository.JpaRepository;import sn.gestionimmobiliere.backend.lease.domain.*;
+public interface LeaseRepository extends JpaRepository<Lease,UUID>{Page<Lease> findAllByOrganizationId(UUID organizationId,Pageable p);List<Lease> findAllByOrganizationIdAndStatus(UUID organizationId,LeaseStatus status);Optional<Lease> findByIdAndOrganizationId(UUID id,UUID organizationId);boolean existsByUnitIdAndOrganizationIdAndStatus(UUID unitId,UUID organizationId,LeaseStatus status);long countByOrganizationIdAndStatus(UUID organizationId,LeaseStatus status);}

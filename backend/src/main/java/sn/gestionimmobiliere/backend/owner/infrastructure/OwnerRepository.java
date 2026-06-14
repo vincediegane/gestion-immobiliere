@@ -19,4 +19,6 @@ public interface OwnerRepository extends JpaRepository<Owner, UUID> {
 
 	boolean existsByOrganizationIdAndEmailIgnoreCaseAndIdNotAndDeletedAtIsNull(UUID organizationId, String email,
 			UUID id);
+
+	long countByOrganizationIdAndDeletedAtIsNull(UUID organizationId);
 }

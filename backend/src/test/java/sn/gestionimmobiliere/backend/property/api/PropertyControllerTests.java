@@ -19,6 +19,7 @@ import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.http.MediaType;
@@ -33,8 +34,10 @@ import sn.gestionimmobiliere.backend.property.application.PropertyService;
 import sn.gestionimmobiliere.backend.property.domain.PropertyStatus;
 import sn.gestionimmobiliere.backend.property.domain.PropertyType;
 import sn.gestionimmobiliere.backend.shared.api.ApiExceptionHandler;
+import sn.gestionimmobiliere.backend.identity.application.JwtService;
 
 @WebMvcTest(PropertyController.class)
+@AutoConfigureMockMvc(addFilters = false)
 @Import(ApiExceptionHandler.class)
 class PropertyControllerTests {
 
@@ -50,6 +53,9 @@ class PropertyControllerTests {
 
 	@MockitoBean
 	private PropertyService propertyService;
+
+	@MockitoBean
+	private JwtService jwtService;
 
 	@Test
 	void createsProperty() throws Exception {

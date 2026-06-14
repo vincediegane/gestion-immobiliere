@@ -1,0 +1,1 @@
+package sn.gestionimmobiliere.backend.billing.api;import java.time.*;import java.util.UUID;import sn.gestionimmobiliere.backend.billing.domain.PaymentMethod;public record PaymentResponse(UUID id,UUID rentChargeId,long amount,LocalDate paymentDate,PaymentMethod method,String reference,String status,Instant createdAt){}

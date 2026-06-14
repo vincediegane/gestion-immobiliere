@@ -10,10 +10,16 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.security.authentication.BadCredentialsException;
 
 import sn.gestionimmobiliere.backend.owner.application.DuplicateOwnerEmailException;
 import sn.gestionimmobiliere.backend.owner.application.OwnerNotFoundException;
 import sn.gestionimmobiliere.backend.property.application.PropertyNotFoundException;
+import sn.gestionimmobiliere.backend.tenant.application.TenantNotFoundException;
+import sn.gestionimmobiliere.backend.unit.application.UnitNotFoundException;
+import sn.gestionimmobiliere.backend.billing.application.RentChargeNotFoundException;
+import sn.gestionimmobiliere.backend.lease.application.LeaseConflictException;
+import sn.gestionimmobiliere.backend.lease.application.LeaseNotFoundException;
 
 @RestControllerAdvice
 public class ApiExceptionHandler {
@@ -27,6 +33,22 @@ public class ApiExceptionHandler {
 	ProblemDetail handlePropertyNotFound(PropertyNotFoundException exception) {
 		return problem(HttpStatus.NOT_FOUND, "property-not-found", "Bien immobilier introuvable",
 				exception.getMessage());
+	}
+
+	@ExceptionHandler({UnitNotFoundException.class, TenantNotFoundException.class, LeaseNotFoundException.class,
+			RentChargeNotFoundException.class})
+	ProblemDetail handleReferenceNotFound(RuntimeException exception) {
+		return problem(HttpStatus.NOT_FOUND, "resource-not-found", "Ressource introuvable", exception.getMessage());
+	}
+
+	@ExceptionHandler({LeaseConflictException.class, IllegalArgumentException.class})
+	ProblemDetail handleBusinessConflict(RuntimeException exception) {
+		return problem(HttpStatus.CONFLICT, "business-conflict", "Operation impossible", exception.getMessage());
+	}
+
+	@ExceptionHandler(BadCredentialsException.class)
+	ProblemDetail handleBadCredentials() {
+		return problem(HttpStatus.UNAUTHORIZED, "invalid-credentials", "Authentification refusee", "Identifiants invalides");
 	}
 
 	@ExceptionHandler(DuplicateOwnerEmailException.class)

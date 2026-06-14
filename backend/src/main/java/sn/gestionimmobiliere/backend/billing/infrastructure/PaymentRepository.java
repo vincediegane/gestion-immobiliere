@@ -1,0 +1,1 @@
+package sn.gestionimmobiliere.backend.billing.infrastructure;import java.util.*;import org.springframework.data.jpa.repository.JpaRepository;import sn.gestionimmobiliere.backend.billing.domain.Payment;public interface PaymentRepository extends JpaRepository<Payment,UUID>{List<Payment> findAllByRentChargeIdOrderByPaymentDateDesc(UUID chargeId);}

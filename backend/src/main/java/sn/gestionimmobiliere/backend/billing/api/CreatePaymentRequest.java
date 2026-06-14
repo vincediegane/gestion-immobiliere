@@ -1,0 +1,1 @@
+package sn.gestionimmobiliere.backend.billing.api;import java.time.LocalDate;import jakarta.validation.constraints.*;import sn.gestionimmobiliere.backend.billing.domain.PaymentMethod;public record CreatePaymentRequest(@Positive long amount,@NotNull LocalDate paymentDate,@NotNull PaymentMethod method,@Size(max=120)String reference){}

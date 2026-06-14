@@ -1,0 +1,1 @@
+package sn.gestionimmobiliere.backend.reminder.infrastructure;import java.util.UUID;import org.springframework.data.jpa.repository.JpaRepository;import sn.gestionimmobiliere.backend.reminder.domain.Reminder;public interface ReminderRepository extends JpaRepository<Reminder,UUID>{}

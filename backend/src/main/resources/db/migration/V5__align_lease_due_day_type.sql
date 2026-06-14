@@ -1,0 +1,2 @@
+ALTER TABLE leases
+    ALTER COLUMN due_day TYPE INTEGER;

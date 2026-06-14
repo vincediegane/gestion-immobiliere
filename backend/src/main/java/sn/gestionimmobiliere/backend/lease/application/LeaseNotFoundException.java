@@ -1,0 +1,1 @@
+package sn.gestionimmobiliere.backend.lease.application;import java.util.UUID;public class LeaseNotFoundException extends RuntimeException{public LeaseNotFoundException(UUID id){super("Bail introuvable: "+id);}}

@@ -1,0 +1,1 @@
+package sn.gestionimmobiliere.backend.billing.application;import java.util.UUID;public class RentChargeNotFoundException extends RuntimeException{public RentChargeNotFoundException(UUID id){super("Echeance introuvable: "+id);}}

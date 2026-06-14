@@ -1,0 +1,1 @@
+package sn.gestionimmobiliere.backend.reminder.api;import java.time.Instant;import java.util.UUID;public record ReminderResponse(UUID id,String phone,String message,String whatsappUrl,Instant preparedAt){}

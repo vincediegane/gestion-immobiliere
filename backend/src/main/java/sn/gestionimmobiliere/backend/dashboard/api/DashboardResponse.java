@@ -1,0 +1,1 @@
+package sn.gestionimmobiliere.backend.dashboard.api;public record DashboardResponse(long owners,long properties,long units,long tenants,long activeLeases,long expectedRent,long collectedRent,long unpaidRent){}
