@@ -2,32 +2,104 @@
 
 Plateforme SaaS de gestion immobiliere pour le Senegal.
 
-Le Sprint 1 fournit uniquement le socle technique :
+L'application comprend actuellement :
 
 - backend Spring Boot 3 / Java 21 / Maven ;
 - frontend React / TypeScript / Vite / Material UI ;
-- PostgreSQL avec Docker Compose ;
+- modules de gestion des proprietaires et des biens immobiliers ;
+- documentation OpenAPI et interface Swagger UI ;
+- PostgreSQL, backend et frontend entierement dockerises ;
 - healthcheck backend `GET /api/health` ;
 - page d'accueil frontend `Real Estate SaaS MVP`.
 
-Aucun module metier (proprietaire, bien, locataire, bail ou paiement) n'est implemente dans ce sprint.
+Les modules Unit, Tenant, Lease et Payment ne sont pas encore implementes.
 
-## Prerequis
+## Lancement avec Docker
 
-- Docker Desktop avec Docker Compose ;
-- Java 21 pour lancer le backend hors conteneur ;
-- Node.js 22.13 ou plus recent pour le frontend.
-
-Maven n'a pas besoin d'etre installe globalement : le projet fournit Maven Wrapper.
-
-## 1. Demarrer PostgreSQL
+Le seul prerequis est Docker avec Docker Compose. Java, Maven, Node.js et Nginx sont fournis par les images.
 
 Depuis la racine du depot :
 
-```powershell
-docker compose up -d postgres
+```bash
+docker compose up --build -d
 docker compose ps
 ```
+
+Services disponibles :
+
+- frontend : `http://localhost:5173` ;
+- backend direct : `http://localhost:8080` ;
+- API via le frontend/Nginx : `http://localhost:5173/api/owners` ;
+- Swagger UI : `http://localhost:8080/swagger-ui/index.html` ;
+- specification OpenAPI : `http://localhost:8080/v3/api-docs` ;
+- PostgreSQL : `localhost:5432`.
+
+Les corps JSON envoyes a l'API doivent etre encodes en UTF-8. Utiliser de preference l'en-tete `Content-Type: application/json; charset=UTF-8`, notamment pour les noms et adresses avec accents.
+
+Verifier les services :
+
+```bash
+curl http://localhost:8080/api/health
+curl http://localhost:5173/api/health
+```
+
+Endpoints Property disponibles :
+
+- `POST /api/properties` ;
+- `GET /api/properties` ;
+- `GET /api/properties/{id}` ;
+- `PUT /api/properties/{id}` ;
+- `DELETE /api/properties/{id}` ;
+- `GET /api/owners/{ownerId}/properties`.
+
+Afficher les logs :
+
+```bash
+docker compose logs -f
+docker compose logs -f backend
+```
+
+Arreter l'application :
+
+```bash
+docker compose down
+```
+
+Arreter l'application et supprimer les donnees PostgreSQL locales :
+
+```bash
+docker compose down -v
+```
+
+## Tests sans Maven local
+
+La construction de l'image backend execute automatiquement les tests Maven :
+
+```bash
+docker compose build backend
+```
+
+Pour executer explicitement l'equivalent de `mvn clean test` dans un conteneur :
+
+```bash
+docker compose run --rm backend-tests
+```
+
+Le service `backend-tests` utilise une image Maven dediee et un volume `maven_cache`. Il ne fait pas partie des services permanents lances par `docker compose up`.
+
+L'image d'execution `backend` contient seulement Java et le JAR de l'application. La commande suivante ne peut donc pas fonctionner et retournerait `mvn: executable file not found` :
+
+```bash
+docker compose exec backend mvn clean test
+```
+
+Le build frontend execute `npm run lint` puis `npm run build` :
+
+```bash
+docker compose build frontend
+```
+
+## Configuration
 
 Configuration locale par defaut :
 
@@ -39,47 +111,7 @@ Configuration locale par defaut :
 | Utilisateur | `real_estate` |
 | Mot de passe | `real_estate_dev` |
 
-Ces valeurs sont reservees au developpement local. Elles peuvent etre surchargees avec `DB_NAME`, `DB_USER`, `DB_PASSWORD` et `DB_PORT`.
-
-Pour arreter la base :
-
-```powershell
-docker compose down
-```
-
-Pour supprimer egalement les donnees locales :
-
-```powershell
-docker compose down -v
-```
-
-## 2. Demarrer le backend
-
-PostgreSQL doit etre disponible avant le demarrage.
-
-Sous Windows PowerShell :
-
-```powershell
-cd backend
-.\mvnw.cmd spring-boot:run
-```
-
-Sous Linux ou macOS :
-
-```bash
-cd backend
-./mvnw spring-boot:run
-```
-
-Le backend est disponible sur `http://localhost:8080`.
-
-Verifier le healthcheck :
-
-```powershell
-Invoke-RestMethod http://localhost:8080/api/health
-```
-
-Reponse attendue :
+Reponse attendue du healthcheck :
 
 ```json
 {
@@ -88,51 +120,28 @@ Reponse attendue :
 }
 ```
 
-Variables backend disponibles : `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD` et `SERVER_PORT`.
+Variables Docker Compose disponibles :
 
-## 3. Demarrer le frontend
+- `DB_NAME`, `DB_USER`, `DB_PASSWORD`, `DB_PORT` ;
+- `BACKEND_PORT` et `FRONTEND_PORT` ;
+- `DEFAULT_ORGANIZATION_ID`.
 
-Dans un second terminal :
+`DEFAULT_ORGANIZATION_ID` fournit le tenant technique temporaire des modules Owner et Property tant que l'authentification et le module Organization ne sont pas encore implementes.
 
-```powershell
-cd frontend
-npm ci
-npm run dev
-```
+Verifier la configuration Compose sans demarrer les services :
 
-Le frontend est disponible sur `http://localhost:5173` et affiche `Real Estate SaaS MVP`.
-
-## Verification
-
-Backend :
-
-```powershell
-cd backend
-.\mvnw.cmd test
-```
-
-Frontend :
-
-```powershell
-cd frontend
-npm run lint
-npm run build
-```
-
-Configuration Docker Compose :
-
-```powershell
+```bash
 docker compose config
 ```
 
 ## Structure
 
 ```text
-backend/              Application Spring Boot et migrations Flyway
-frontend/             Application React TypeScript et Material UI
+backend/              Spring Boot, migration Flyway et Dockerfile Java 21
+frontend/             React, configuration Nginx et Dockerfile Node/Nginx
 agents/               Roles des agents du projet
 docs/                 Backlog MVP et architecture technique
-docker-compose.yml    PostgreSQL local
+docker-compose.yml    PostgreSQL, backend et frontend
 AGENTS.md              Regles globales du projet
 README.md              Instructions de demarrage
 ```

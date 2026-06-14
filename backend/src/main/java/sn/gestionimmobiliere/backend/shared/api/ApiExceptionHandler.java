@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import sn.gestionimmobiliere.backend.owner.application.DuplicateOwnerEmailException;
 import sn.gestionimmobiliere.backend.owner.application.OwnerNotFoundException;
+import sn.gestionimmobiliere.backend.property.application.PropertyNotFoundException;
 
 @RestControllerAdvice
 public class ApiExceptionHandler {
@@ -20,6 +21,12 @@ public class ApiExceptionHandler {
 	@ExceptionHandler(OwnerNotFoundException.class)
 	ProblemDetail handleOwnerNotFound(OwnerNotFoundException exception) {
 		return problem(HttpStatus.NOT_FOUND, "owner-not-found", "Proprietaire introuvable", exception.getMessage());
+	}
+
+	@ExceptionHandler(PropertyNotFoundException.class)
+	ProblemDetail handlePropertyNotFound(PropertyNotFoundException exception) {
+		return problem(HttpStatus.NOT_FOUND, "property-not-found", "Bien immobilier introuvable",
+				exception.getMessage());
 	}
 
 	@ExceptionHandler(DuplicateOwnerEmailException.class)
@@ -50,6 +57,15 @@ public class ApiExceptionHandler {
 				"malformed-json",
 				"Corps JSON invalide",
 				"Le corps de la requete doit contenir un JSON valide encode en UTF-8");
+	}
+
+	@ExceptionHandler(InvalidSortPropertyException.class)
+	ProblemDetail handleInvalidSortProperty(InvalidSortPropertyException exception) {
+		return problem(
+				HttpStatus.BAD_REQUEST,
+				"invalid-sort-property",
+				"Champ de tri invalide",
+				exception.getMessage());
 	}
 
 	private ProblemDetail problem(HttpStatus status, String code, String title, String message) {

@@ -103,6 +103,17 @@ class OwnerControllerTests {
 	}
 
 	@Test
+	void rejectsUnknownOwnerSortProperty() throws Exception {
+		mockMvc.perform(get("/api/owners")
+				.param("page", "0")
+				.param("size", "1")
+				.param("sort", "[\"string\"]"))
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.code").value("invalid-sort-property"))
+				.andExpect(jsonPath("$.detail").value("Le champ de tri '[\"string\"]' n'est pas autorise"));
+	}
+
+	@Test
 	void returnsOwner() throws Exception {
 		when(ownerService.findById(OWNER_ID)).thenReturn(ownerResponse());
 
