@@ -2,17 +2,23 @@
 
 Plateforme SaaS de gestion immobiliere pour le Senegal.
 
-L'application comprend actuellement :
+L'application comprend :
 
 - backend Spring Boot 3 / Java 21 / Maven ;
 - frontend React / TypeScript / Vite / Material UI ;
-- modules de gestion des proprietaires et des biens immobiliers ;
+- authentification JWT avec roles `ADMIN` et `GESTIONNAIRE` ;
+- gestion des proprietaires, biens, unites et locataires ;
+- gestion des baux et generation de leur premiere echeance ;
+- paiements partiels ou complets et detection des impayes ;
+- preparation de relances WhatsApp sans envoi automatique ;
+- generation de quittances PDF pour les echeances soldees ;
+- tableau de bord avec compteurs et montants XOF ;
 - documentation OpenAPI et interface Swagger UI ;
 - PostgreSQL, backend et frontend entierement dockerises ;
 - healthcheck backend `GET /api/health` ;
 - page d'accueil frontend `Real Estate SaaS MVP`.
 
-Les modules Unit, Tenant, Lease et Payment ne sont pas encore implementes.
+Le MVP fonctionne comme un monolithe modulaire avec une organisation locale initiale.
 
 ## Lancement avec Docker
 
@@ -34,6 +40,15 @@ Services disponibles :
 - specification OpenAPI : `http://localhost:8080/v3/api-docs` ;
 - PostgreSQL : `localhost:5432`.
 
+Compte administrateur local :
+
+```text
+Email : admin@demo.sn
+Mot de passe : Admin123!
+```
+
+Ces valeurs sont uniquement destinees au developpement local et doivent etre remplacees par variables d'environnement hors poste de developpement.
+
 Les corps JSON envoyes a l'API doivent etre encodes en UTF-8. Utiliser de preference l'en-tete `Content-Type: application/json; charset=UTF-8`, notamment pour les noms et adresses avec accents.
 
 Verifier les services :
@@ -51,6 +66,18 @@ Endpoints Property disponibles :
 - `PUT /api/properties/{id}` ;
 - `DELETE /api/properties/{id}` ;
 - `GET /api/owners/{ownerId}/properties`.
+
+Principales familles d'endpoints :
+
+- `/api/auth/login` ;
+- `/api/owners`, `/api/properties`, `/api/units`, `/api/tenants` ;
+- `/api/leases` et `/api/leases/{id}/terminate` ;
+- `/api/rent-charges` et `/api/rent-charges/{id}/payments` ;
+- `/api/rent-charges/{id}/reminder-preview` ;
+- `/api/rent-charges/{id}/receipt` et `/api/receipts/{id}/pdf` ;
+- `/api/dashboard/summary`.
+
+Toutes les routes metier exigent `Authorization: Bearer <token>`. Les suppressions exigent le role `ADMIN`.
 
 Afficher les logs :
 
@@ -125,8 +152,10 @@ Variables Docker Compose disponibles :
 - `DB_NAME`, `DB_USER`, `DB_PASSWORD`, `DB_PORT` ;
 - `BACKEND_PORT` et `FRONTEND_PORT` ;
 - `DEFAULT_ORGANIZATION_ID`.
+- `JWT_SECRET`, `JWT_VALIDITY_MINUTES` ;
+- `BOOTSTRAP_ADMIN_EMAIL`, `BOOTSTRAP_ADMIN_PASSWORD`.
 
-`DEFAULT_ORGANIZATION_ID` fournit le tenant technique temporaire des modules Owner et Property tant que l'authentification et le module Organization ne sont pas encore implementes.
+`DEFAULT_ORGANIZATION_ID` fournit l'organisation initiale locale. Pour une requete authentifiee, l'organisation effective provient du claim JWT `organization_id`.
 
 Verifier la configuration Compose sans demarrer les services :
 
@@ -151,3 +180,4 @@ README.md              Instructions de demarrage
 - `AGENTS.md` : regles globales et Definition of Done.
 - `docs/BACKLOG.md` : epics, user stories et criteres d'acceptation.
 - `docs/ARCHITECTURE.md` : architecture cible du MVP.
+- `docs/MVP_STATUS.md` : perimetre livre, validations et limites connues.

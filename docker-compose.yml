@@ -28,6 +28,10 @@ services:
       DB_USER: ${DB_USER:-real_estate}
       DB_PASSWORD: ${DB_PASSWORD:-real_estate_dev}
       DEFAULT_ORGANIZATION_ID: ${DEFAULT_ORGANIZATION_ID:-00000000-0000-0000-0000-000000000001}
+      JWT_SECRET: ${JWT_SECRET:-local-development-secret-key-change-before-production-2026}
+      JWT_VALIDITY_MINUTES: ${JWT_VALIDITY_MINUTES:-480}
+      BOOTSTRAP_ADMIN_EMAIL: ${BOOTSTRAP_ADMIN_EMAIL:-admin@demo.sn}
+      BOOTSTRAP_ADMIN_PASSWORD: ${BOOTSTRAP_ADMIN_PASSWORD:-Admin123!}
       SERVER_PORT: 8080
     ports:
       - "${BACKEND_PORT:-8080}:8080"
