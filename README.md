@@ -5,18 +5,19 @@ Plateforme SaaS de gestion immobiliere pour le Senegal.
 L'application comprend :
 
 - backend Spring Boot 3 / Java 21 / Maven ;
-- frontend React / TypeScript / Vite / Material UI ;
+- frontend React / TypeScript / Vite / Material UI / Tailwind CSS ;
 - authentification JWT avec roles `ADMIN` et `GESTIONNAIRE` ;
 - gestion des proprietaires, biens, unites et locataires ;
-- gestion des baux et generation idempotente de toutes leurs echeances mensuelles manquantes ;
-- paiements partiels ou complets et detection des impayes ;
+- gestion des baux et generation idempotente de toutes leurs echeances mensuelles manquantes, y compris le rattrapage des baux termines ;
+- paiements partiels ou complets, verrouilles contre les depassements concurrents, avec cle d'idempotence stricte ;
 - preparation de relances WhatsApp sans envoi automatique ;
 - generation de quittances PDF pour les echeances soldees ;
 - tableau de bord avec compteurs et montants XOF ;
 - documentation OpenAPI et interface Swagger UI ;
 - PostgreSQL, backend et frontend entierement dockerises ;
 - healthcheck backend `GET /api/health` ;
-- page d'accueil frontend `Real Estate SaaS MVP`.
+- page d'accueil frontend `Real Estate SaaS MVP` ;
+- donnees de demonstration chargees par Flyway en environnement local.
 
 Le MVP fonctionne comme un monolithe modulaire avec une organisation locale initiale.
 
@@ -43,6 +44,15 @@ Services disponibles :
 - PostgreSQL n'est pas expose sur l'hote par defaut.
 
 Les identifiants administrateur et tous les secrets sont obligatoires dans `.env`. Le depot ne fournit aucun mot de passe utilisable par defaut.
+
+Comptes de demonstration locaux apres application des migrations :
+
+| Role | Email | Mot de passe |
+|---|---|---|
+| ADMIN | `admin@gestion.local` | `Passer123` |
+| GESTIONNAIRE | `gestionnaire@gestion.local` | `Passer123` |
+
+La migration `V7__seed_demo_data.sql` cree aussi un jeu de donnees fictif : 3 proprietaires, 3 biens, 4 unites, 3 locataires, 3 baux, 8 echeances, 6 paiements, 2 quittances et quelques relances preparees.
 
 Pour exposer temporairement PostgreSQL sur `localhost:5432` en developpement :
 

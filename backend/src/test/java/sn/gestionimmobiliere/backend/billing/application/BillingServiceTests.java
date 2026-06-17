@@ -62,6 +62,21 @@ class BillingServiceTests {
 	}
 
 	@Test
+	void rejectsSameIdempotencyKeyWithDifferentPayload() {
+		RentCharge charge = charge(100_000);
+		Payment previous = new Payment(UUID.randomUUID(), ORGANIZATION_ID, CHARGE_ID, "payment-1", 50_000,
+				LocalDate.of(2026, 6, 14), PaymentMethod.CASH, null, NOW);
+		when(charges.findForPayment(CHARGE_ID, ORGANIZATION_ID)).thenReturn(Optional.of(charge));
+		when(payments.findByOrganizationIdAndIdempotencyKey(ORGANIZATION_ID, "payment-1"))
+				.thenReturn(Optional.of(previous));
+
+		assertThatThrownBy(() -> service.pay(CHARGE_ID, request(60_000), "payment-1"))
+				.isInstanceOf(PaymentConflictException.class)
+				.hasMessageContaining("contenu different");
+		verify(payments, never()).saveAndFlush(any());
+	}
+
+	@Test
 	void rejectsAmountAboveLockedRemainingBalance() {
 		RentCharge charge = charge(100_000);
 		charge.pay(80_000, LocalDate.of(2026, 6, 14), NOW);

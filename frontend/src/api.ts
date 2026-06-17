@@ -1,6 +1,22 @@
 export type Page<T> = { content: T[]; totalElements: number }
 const TOKEN_KEY = 'real-estate-token'
-export const session = { token: () => sessionStorage.getItem(TOKEN_KEY), save: (token: string) => sessionStorage.setItem(TOKEN_KEY, token), clear: () => sessionStorage.removeItem(TOKEN_KEY) }
+const NAME_KEY = 'real-estate-user-name'
+const ROLE_KEY = 'real-estate-user-role'
+export const session = {
+  token: () => sessionStorage.getItem(TOKEN_KEY),
+  fullName: () => sessionStorage.getItem(NAME_KEY),
+  role: () => sessionStorage.getItem(ROLE_KEY),
+  save: (token: string, fullName?: string, role?: string) => {
+    sessionStorage.setItem(TOKEN_KEY, token)
+    if (fullName) sessionStorage.setItem(NAME_KEY, fullName)
+    if (role) sessionStorage.setItem(ROLE_KEY, role)
+  },
+  clear: () => {
+    sessionStorage.removeItem(TOKEN_KEY)
+    sessionStorage.removeItem(NAME_KEY)
+    sessionStorage.removeItem(ROLE_KEY)
+  },
+}
 export async function api<T>(path: string, options: RequestInit = {}): Promise<T> {
   const headers = new Headers(options.headers)
   if (options.body) headers.set('Content-Type', 'application/json; charset=utf-8')
